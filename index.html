@@ -118,22 +118,12 @@ function render(){
     ['HEX', [
       [hex(r,g,b), hex(r,g,b)],
     ]],
-    ['RGB 0-255', [
-      [String(Math.round(r*255)), String(Math.round(r*255))],
-      [String(Math.round(g*255)), String(Math.round(g*255))],
-      [String(Math.round(b*255)), String(Math.round(b*255))],
-    ]],
     ['RGB 0-1', [
       [f3(r), f3(r)],
       [f3(g), f3(g)],
       [f3(b), f3(b)],
     ]],
-    ['HSV 度/%', [
-      [Math.round(H*360)+'°', String(Math.round(H*360))],
-      [Math.round(S*100)+'%', String(Math.round(S*100))],
-      [Math.round(V*100)+'%', String(Math.round(V*100))],
-    ]],
-    ['HSV 0-1 (TD)', [
+    ['HSV 0-1', [
       [f3(H), f3(H)],
       [f3(S), f3(S)],
       [f3(V), f3(V)],
