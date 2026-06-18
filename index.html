@@ -35,12 +35,19 @@
   button.primary{background:#1f6feb;border-color:#1f6feb;}
 
   table{width:100%;border-collapse:collapse;margin-top:8px;font-variant-numeric:tabular-nums;}
-  td{padding:7px 8px;border-bottom:1px solid #232733;font-size:13px;}
+  td{padding:7px 8px;border-bottom:1px solid #232733;font-size:13px;vertical-align:middle;}
   td.k{color:#8a90a0;width:120px;}
-  td.v{font-family:ui-monospace,Consolas,monospace;color:#e7e9ee;cursor:pointer;}
-  td.v:hover{color:#7cc4ff;}
-  td.v::after{content:'⧉';margin-left:8px;color:#555;font-size:11px;}
-  .copied{color:#33d17a !important;}
+  td.v{font-family:ui-monospace,Consolas,monospace;color:#e7e9ee;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:6px;
+        background:#1c2029;border:1px solid #2a2f3a;cursor:pointer;user-select:none;
+        font-family:ui-monospace,Consolas,monospace;color:#e7e9ee;font-size:12px;line-height:1.2;
+        transition:background .15s,border-color .15s,color .15s;}
+  .chip:hover{background:#252a36;border-color:#3a4150;color:#7cc4ff;}
+  .chip:active{background:#2c3140;}
+  .chip::after{content:'⧉';font-size:10px;color:#555;}
+  .chip.copied{background:#1a3a26;border-color:#33d17a;color:#33d17a;}
+  .chip.copied::after{content:'✓';color:#33d17a;}
 
   #drop{margin-top:14px;border:1px dashed #3a3f4b;border-radius:8px;padding:10px;text-align:center;
       font-size:12px;color:#8a90a0;}
@@ -106,23 +113,47 @@ function render(){
   swatch.style.background='rgb('+(r*255|0)+','+(g*255|0)+','+(b*255|0)+')';
 
   const f3=x=>x.toFixed(3);
+  // 各行: [label, [(表示文字列, コピーされる文字列), ...]]
   const rows=[
-    ['HEX', hex(r,g,b)],
-    ['RGB 0-255', `${Math.round(r*255)}, ${Math.round(g*255)}, ${Math.round(b*255)}`],
-    ['RGB 0-1', `${f3(r)}, ${f3(g)}, ${f3(b)}`],
-    ['HSV 度/%', `${Math.round(H*360)}°, ${Math.round(S*100)}%, ${Math.round(V*100)}%`],
-    ['HSV 0-1 (TD)', `${f3(H)}, ${f3(S)}, ${f3(V)}`],
+    ['HEX', [
+      [hex(r,g,b), hex(r,g,b)],
+    ]],
+    ['RGB 0-255', [
+      [String(Math.round(r*255)), String(Math.round(r*255))],
+      [String(Math.round(g*255)), String(Math.round(g*255))],
+      [String(Math.round(b*255)), String(Math.round(b*255))],
+    ]],
+    ['RGB 0-1', [
+      [f3(r), f3(r)],
+      [f3(g), f3(g)],
+      [f3(b), f3(b)],
+    ]],
+    ['HSV 度/%', [
+      [Math.round(H*360)+'°', String(Math.round(H*360))],
+      [Math.round(S*100)+'%', String(Math.round(S*100))],
+      [Math.round(V*100)+'%', String(Math.round(V*100))],
+    ]],
+    ['HSV 0-1 (TD)', [
+      [f3(H), f3(H)],
+      [f3(S), f3(S)],
+      [f3(V), f3(V)],
+    ]],
   ];
-  out.innerHTML = rows.map(([k,v])=>`<tr><td class="k">${k}</td><td class="v" data-copy="${v}">${v}</td></tr>`).join('');
+  out.innerHTML = rows.map(([k, chips])=>{
+    const cells = chips.map(([label, copy])=>
+      `<span class="chip" data-copy="${copy}">${label}</span>`
+    ).join('');
+    return `<tr><td class="k">${k}</td><td class="v"><div class="chips">${cells}</div></td></tr>`;
+  }).join('');
 }
 function setHSV(h,s,v){H=h;S=s;V=v;hue.value=h;render();}
 function setRGB(r,g,b){const [h,s,v]=rgb2hsv(r,g,b);setHSV(h,s,v);}
 
-// copy on cell click
+// copy on chip click
 out.addEventListener('click',e=>{
-  const td=e.target.closest('td.v'); if(!td) return;
-  navigator.clipboard?.writeText(td.dataset.copy).then(()=>{
-    td.classList.add('copied'); setTimeout(()=>td.classList.remove('copied'),600);
+  const chip=e.target.closest('.chip'); if(!chip) return;
+  navigator.clipboard?.writeText(chip.dataset.copy).then(()=>{
+    chip.classList.add('copied'); setTimeout(()=>chip.classList.remove('copied'),700);
   });
 });
 
